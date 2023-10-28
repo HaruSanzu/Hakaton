@@ -5,7 +5,6 @@ from telebot import types
 from db import Database
 bot = telebot.TeleBot('6562981721:AAEMBmZ3Sav5xoz5DOj9r6CDJCgsAUcGYxs')
 
-db = Database('database.db')
 
 
 
@@ -30,9 +29,6 @@ def on_click(message):
         bot.send_message(message.chat.id, "Неизвестная Команда")
 
         bot.register_next_step_handler(message, on_click)
-
-
-
 
 @bot.message_handler(func = lambda message: message.text == 'Группа 1' or message.text == 'Группа 2')
 
@@ -65,17 +61,17 @@ def group(message):
 
 
 
-@bot.message_handler(command=['students'])
-def students():
-    connection = sqlite3.connect(db)
+@bot.message_handler(commands=['students'])
+def students(message):
+    connection = sqlite3.connect('C:\\Users\\User\\IdeaProjects\\Hakaton-main\\database')
     cursor = connection.cursor()
-    cursor.execute("SELECT * FROM students")
+    cursor.execute("SELECT * FROM students WHERE group_name = 1")
     students = cursor.fetchall()
     connection.close()
-    message = ''
+    message_text = ''
     for student in students:
-        message += f'{student[0]} - {student[1]}\n'
-    bot.send_message(message.chat.id, message)
+        message_text += f'{student[1]} - {student[2]}\n'
+    bot.send_message(message.chat.id, message_text)
 
 
 bot.polling(none_stop=True)
