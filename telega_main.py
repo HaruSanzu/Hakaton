@@ -6,7 +6,7 @@ from db import Database
 bot = telebot.TeleBot('6562981721:AAEMBmZ3Sav5xoz5DOj9r6CDJCgsAUcGYxs')
 
 
-
+selected_context = {}
 
 
 @bot.message_handler(commands=['start'])
@@ -32,14 +32,14 @@ def on_click(message):
 selected_group = {}
 @bot.message_handler(func = lambda message: message.text == 'Группа 1' or message.text == 'Группа 2')
 
-
 def group(message):
+    selected_context[message.chat.id] = 'Группа'
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     if message.text == 'Группа 1':
         selected_group[message.chat.id] = 'Группа 1'
         btn4 = types.KeyboardButton('Adil')
         btn5 = types.KeyboardButton('Kuka')
-        btn_back = types.KeyboardButton('Nazad')
+        btn_back = types.KeyboardButton('Назад')
         markup.add(btn4,btn5)
         markup.add(btn_back)
         bot.send_message(message.chat.id, 'Выберите Ученика', reply_markup=markup)
@@ -47,21 +47,24 @@ def group(message):
         selected_group[message.chat.id] = 'Группа 2'
         btn6 = types.KeyboardButton('Nurik')
         btn7 = types.KeyboardButton('Nurken')
-        btn_back = types.KeyboardButton('Nazad')
+        btn_back = types.KeyboardButton('Назад')
         markup.add(btn6, btn7)
         markup.add(btn_back)
         bot.send_message(message.chat.id, 'Выберите Ученика', reply_markup=markup)
     else:
         bot.send_message(message.chat.id,'Неизвестная Команда')
 
-    @bot.message_handler(func=lambda message: message.text == 'Nazad')
+    @bot.message_handler(func=lambda message: message.text == 'Назад')
     def go_back(message):
-        markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-        btn2 = types.KeyboardButton('Группа 1')
-        btn3 = types.KeyboardButton('Группа 2')
-        markup.add(btn2)
-        markup.add(btn3)
-        bot.send_message(message.chat.id, 'Выберите Группу', reply_markup= markup)
+        current_context = selected_context.get(message.chat.id)
+        if current_context == 'Группа':
+            markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+            btn2 = types.KeyboardButton('Группа 1')
+            btn3 = types.KeyboardButton('Группа 2')
+            markup.add(btn2)
+            markup.add(btn3)
+            bot.send_message(message.chat.id, 'Выберите Группу', reply_markup= markup)
+
 
 @bot.message_handler(func=lambda message: message.text == 'Adil' or message.text == 'Kuka' or message.text == 'Nurik' or message.text == 'Nurken')
 
@@ -80,24 +83,7 @@ def student(message):
         bot.register_next_step_handler(message, student)
 
 
-@bot.message_handler(func=lambda message: message.text == 'Назад')
-def go_back(message):
-    group = selected_group.get(message.chat.id)
-    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    if group == 'Группа 1':
-        btn4 = types.KeyboardButton('Adil')
-        btn5 = types.KeyboardButton('Kuka')
-        btn_back = types.KeyboardButton('Nazad')
-        markup.add(btn4, btn5)
-        markup.add(btn_back)
-        bot.send_message(message.chat.id, 'Выберите Ученика', reply_markup=markup)
-    elif group == 'Группа 2':
-        btn6 = types.KeyboardButton('Nurik')
-        btn7 = types.KeyboardButton('Nurken')
-        btn_back = types.KeyboardButton('Nazad')
-        markup.add(btn6, btn7)
-        markup.add(btn_back)
-        bot.send_message(message.chat.id, 'Выберите Ученика', reply_markup=markup)
+
 
 @bot.message_handler(func=lambda message: message.text=='Домашка')
 def ask_theme(message):
@@ -127,24 +113,6 @@ def save_homework_ex_count(message):
     connection.commit()
     bot.send_message(message.chat.id, 'Задачи сохранены')
 
-@bot.message_handler(func=lambda message: message.text == 'Назад')
-def go_back(message):
-    group = selected_group.get(message.chat.id)
-    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    if group == 'Группа 1':
-        btn4 = types.KeyboardButton('Adil')
-        btn5 = types.KeyboardButton('Kuka')
-        btn_back = types.KeyboardButton('Nazad')
-        markup.add(btn4, btn5)
-        markup.add(btn_back)
-        bot.send_message(message.chat.id, 'Выберите Ученика', reply_markup=markup)
-    elif group == 'Группа 2':
-        btn6 = types.KeyboardButton('Nurik')
-        btn7 = types.KeyboardButton('Nurken')
-        btn_back = types.KeyboardButton('Nazad')
-        markup.add(btn6, btn7)
-        markup.add(btn_back)
-        bot.send_message(message.chat.id, 'Выберите Ученика', reply_markup=markup)
 
 
 @bot.message_handler(func=lambda message: message.text=='Классная Работа')
@@ -173,26 +141,6 @@ def save_classwork_ex_count(message):
     cursor.execute("UPDATE students SET classwork = ? WHERE student_id = 1" ,(classwork,))
     connection.commit()
     bot.send_message(message.chat.id, 'Задачи сохранены')
-
-
-@bot.message_handler(func=lambda message: message.text == 'Назад')
-def go_back(message):
-    group = selected_group.get(message.chat.id)
-    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    if group == 'Группа 1':
-        btn4 = types.KeyboardButton('Adil')
-        btn5 = types.KeyboardButton('Kuka')
-        btn_back = types.KeyboardButton('Nazad')
-        markup.add(btn4, btn5)
-        markup.add(btn_back)
-        bot.send_message(message.chat.id, 'Выберите Ученика', reply_markup=markup)
-    elif group == 'Группа 2':
-        btn6 = types.KeyboardButton('Nurik')
-        btn7 = types.KeyboardButton('Nurken')
-        btn_back = types.KeyboardButton('Nazad')
-        markup.add(btn6, btn7)
-        markup.add(btn_back)
-        bot.send_message(message.chat.id, 'Выберите Ученика', reply_markup=markup)
 
 
 @bot.message_handler(commands=['students'])
