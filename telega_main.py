@@ -29,13 +29,14 @@ def on_click(message):
         bot.send_message(message.chat.id, "Неизвестная Команда")
 
         bot.register_next_step_handler(message, on_click)
-
+selected_group = {}
 @bot.message_handler(func = lambda message: message.text == 'Группа 1' or message.text == 'Группа 2')
 
 
 def group(message):
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     if message.text == 'Группа 1':
+        selected_group[message.chat.id] = 'Группа 1'
         btn4 = types.KeyboardButton('Adil')
         btn5 = types.KeyboardButton('Kuka')
         btn_back = types.KeyboardButton('Nazad')
@@ -43,12 +44,15 @@ def group(message):
         markup.add(btn_back)
         bot.send_message(message.chat.id, 'Выберите Ученика', reply_markup=markup)
     elif message.text == 'Группа 2':
+        selected_group[message.chat.id] = 'Группа 2'
         btn6 = types.KeyboardButton('Nurik')
         btn7 = types.KeyboardButton('Nurken')
         btn_back = types.KeyboardButton('Nazad')
         markup.add(btn6, btn7)
         markup.add(btn_back)
-    bot.send_message(message.chat.id, 'Выберите Ученика', reply_markup=markup)
+        bot.send_message(message.chat.id, 'Выберите Ученика', reply_markup=markup)
+    else:
+        bot.send_message(message.chat.id,'Неизвестная Команда')
 
     @bot.message_handler(func=lambda message: message.text == 'Nazad')
     def go_back(message):
@@ -59,13 +63,143 @@ def group(message):
         markup.add(btn3)
         bot.send_message(message.chat.id, 'Выберите Группу', reply_markup= markup)
 
+@bot.message_handler(func=lambda message: message.text == 'Adil' or message.text == 'Kuka' or message.text == 'Nurik' or message.text == 'Nurken')
+
+def student(message):
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    if message.text == 'Adil'  or message.text == 'Kuka' or message.text == 'Nurik' or message.text == 'Nurken':
+        btn8 = types.KeyboardButton('Домашка')
+        btn9 = types.KeyboardButton('Классная Работа')
+        btn10 = types.KeyboardButton('Контрольная Работа')
+        btn11 = types.KeyboardButton('Назад')
+        markup.add(btn8,btn9,btn10)
+        markup.add(btn11)
+        bot.send_message(message.chat.id,"Выберите Действие",reply_markup=markup)
+    else:
+        bot.send_message(message.chat.id,'Неверная команда,повторите попытку')
+
+        bot.register_next_step_handler(message, student)
+
+
+@bot.message_handler(func=lambda message: message.text == 'Назад')
+def go_back(message):
+    group = selected_group.get(message.chat.id)
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    if group == 'Группа 1':
+        btn4 = types.KeyboardButton('Adil')
+        btn5 = types.KeyboardButton('Kuka')
+        btn_back = types.KeyboardButton('Nazad')
+        markup.add(btn4, btn5)
+        markup.add(btn_back)
+        bot.send_message(message.chat.id, 'Выберите Ученика', reply_markup=markup)
+    elif group == 'Группа 2':
+        btn6 = types.KeyboardButton('Nurik')
+        btn7 = types.KeyboardButton('Nurken')
+        btn_back = types.KeyboardButton('Nazad')
+        markup.add(btn6, btn7)
+        markup.add(btn_back)
+        bot.send_message(message.chat.id, 'Выберите Ученика', reply_markup=markup)
+
+@bot.message_handler(func=lambda message: message.text=='Домашка')
+def ask_theme(message):
+    bot.send_message(message.chat.id, 'Напишите тему')
+    bot.register_next_step_handler(message, save_homework_topic)
+
+def save_homework_topic(message):
+    connection = sqlite3.connect('C:\\Users\\user\\IdeaProjects\\projectX\\database')
+    cursor = connection.cursor()
+    student_id = 1
+    homework_theme = message.text
+    cursor.execute("UPDATE students SET homework_theme = ? WHERE student_id = 1", (homework_theme,))
+    connection.commit()
+    bot.send_message(message.chat.id,f'Тема сохранена: {homework_theme}')
+
+@bot.message_handler(func=lambda message: message.text == 'Далее')
+def ask_ex_count(message):
+    bot.send_message(message.chat.id, 'Какие задачи были выполнены?')
+    bot.register_next_step_handler(message, save_homework_ex_count)
+
+@bot.message_handler(func=lambda message: message.text == 'Назад')
+def go_back(message):
+    group = selected_group.get(message.chat.id)
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    if group == 'Группа 1':
+        btn4 = types.KeyboardButton('Adil')
+        btn5 = types.KeyboardButton('Kuka')
+        btn_back = types.KeyboardButton('Nazad')
+        markup.add(btn4, btn5)
+        markup.add(btn_back)
+        bot.send_message(message.chat.id, 'Выберите Ученика', reply_markup=markup)
+    elif group == 'Группа 2':
+        btn6 = types.KeyboardButton('Nurik')
+        btn7 = types.KeyboardButton('Nurken')
+        btn_back = types.KeyboardButton('Nazad')
+        markup.add(btn6, btn7)
+        markup.add(btn_back)
+        bot.send_message(message.chat.id, 'Выберите Ученика', reply_markup=markup)
+
+@bot.message_handler(func=lambda message: message.text=='Классная Работа')
+def ask_theme(message):
+    bot.send_message(message.chat.id, 'Напишите тему')
+    bot.register_next_step_handler(message, save_homework_topic)
+
+def save_homework_topic(message):
+    connection = sqlite3.connect('C:\\Users\\user\\IdeaProjects\\projectX\\database')
+    cursor = connection.cursor()
+    student_id = 1
+    classwork_theme = message.text
+    cursor.execute("UPDATE students SET classwork_theme = ? WHERE student_id = 1", (classwork_theme,))
+    connection.commit()
+    bot.send_message(message.chat.id,f'Тема сохранена: {classwork_theme}')
+@bot.message_handler(func=lambda message: message.text == 'Далее')
+def ask_ex_count(message):
+    bot.send_message(message.chat.id, 'Какие задачи были выполнены?')
+    bot.register_next_step_handler(message, save_homework_ex_count)
+
+@bot.message_handler(func=lambda message: message.text == 'Назад')
+def go_back(message):
+    group = selected_group.get(message.chat.id)
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    if group == 'Группа 1':
+        btn4 = types.KeyboardButton('Adil')
+        btn5 = types.KeyboardButton('Kuka')
+        btn_back = types.KeyboardButton('Nazad')
+        markup.add(btn4, btn5)
+        markup.add(btn_back)
+        bot.send_message(message.chat.id, 'Выберите Ученика', reply_markup=markup)
+    elif group == 'Группа 2':
+        btn6 = types.KeyboardButton('Nurik')
+        btn7 = types.KeyboardButton('Nurken')
+        btn_back = types.KeyboardButton('Nazad')
+        markup.add(btn6, btn7)
+        markup.add(btn_back)
+        bot.send_message(message.chat.id, 'Выберите Ученика', reply_markup=markup)
+
+def save_homework_ex_count(message):
+    connection = sqlite3.connect('C:\\Users\\user\\IdeaProjects\\projectX\\database')
+    cursor = connection.cursor()
+    student_id = 1
+    classwork = message.text
+    cursor.execute("UPDATE students SET classwork = ? WHERE student_id = 1" ,(classwork,))
+    connection.commit()
+    bot.send_message(message.chat.id, 'Задачи сохранены')
+
+
+
+
+
+
+
+
+
+
 
 
 @bot.message_handler(commands=['students'])
 def students(message):
-    connection = sqlite3.connect('C:\\Users\\User\\IdeaProjects\\Hakaton-main\\database')
+    connection = sqlite3.connect('C:\\Users\\user\\IdeaProjects\\projectX\\database')
     cursor = connection.cursor()
-    cursor.execute("SELECT * FROM students WHERE group_name = 1")
+    cursor.execute("SELECT * FROM students")
     students = cursor.fetchall()
     connection.close()
     message_text = ''
